@@ -65,6 +65,7 @@ BAG_OF_WORDS_ARCHIVE_MAP = {
     'science': "https://s3.amazonaws.com/models.huggingface.co/bert/pplm/bow/science.txt",
     'space': "https://s3.amazonaws.com/models.huggingface.co/bert/pplm/bow/space.txt",
     'technology': "https://s3.amazonaws.com/models.huggingface.co/bert/pplm/bow/technology.txt",
+    'dialogue': "dialogue.txt"
 }
 
 DISCRIMINATOR_MODELS_PARAMS = {
@@ -846,6 +847,9 @@ def run_pplm_example(
 
 
 if __name__ == '__main__':
+    import torch
+    vocab = torch.load("SST_classifier_head.pt", map_location='cpu')
+    print(vocab)
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--pretrained_model",

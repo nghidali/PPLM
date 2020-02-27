@@ -3,3 +3,6 @@ nltk
 colorama
 transformers
 torchtext
+IPython
+run_gpt2
+style_utils
