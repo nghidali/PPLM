@@ -38,6 +38,14 @@ from transformers.modeling_gpt2 import GPT2LMHeadModel
 
 from pplm_classification_head import ClassificationHead
 
+#import os
+#os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
+import random
+import string
+
+#import spacy
+
 PPLM_BOW = 1
 PPLM_DISCRIM = 2
 PPLM_BOW_DISCRIM = 3
@@ -65,7 +73,8 @@ BAG_OF_WORDS_ARCHIVE_MAP = {
     'science': "https://s3.amazonaws.com/models.huggingface.co/bert/pplm/bow/science.txt",
     'space': "https://s3.amazonaws.com/models.huggingface.co/bert/pplm/bow/space.txt",
     'technology': "https://s3.amazonaws.com/models.huggingface.co/bert/pplm/bow/technology.txt",
-    'dialogue': "dialogue.txt"
+    'dialogue': "dialogue.txt",
+    'excited': "excited.txt"
 }
 
 DISCRIMINATOR_MODELS_PARAMS = {
@@ -835,6 +844,9 @@ def run_pplm_example(
             print("= Perturbed generated text {} =".format(i + 1))
             print(pert_gen_text)
             print()
+            # saves output to text file: 'pplm_output.txt'
+            create_bag_of_words_1(pert_gen_text)
+
         except:
             pass
 
@@ -842,6 +854,99 @@ def run_pplm_example(
         generated_texts.append(
             (tokenized_cond_text, pert_gen_tok_text, unpert_gen_tok_text)
         )
+
+    # run loop
+    pick_one(len(pert_gen_tok_texts))
+    clean_up_samples()
+
+    return
+
+
+
+# my Code
+def pick_one(num):
+
+    idx = random.randint(0, num)
+    file = open('samples1.txt')
+    sentence = str(file.readlines(idx))
+
+    f = open("new_input.txt","a+")
+    f.write(sentence)
+
+    f.close()
+
+def check_sample(line):
+        line = line.strip()
+
+        if line.endswith('.'):
+            return line
+        elif line.endswith('!'):
+            return line
+        elif line.endswith('?'):
+            return line
+        else:
+            new_line = line.split()
+            if len(new_line) == 0:
+                return 0
+            new_line.pop()
+            s = " "
+            text = s.join(new_line)
+            return check_sample(text)
+
+def clean_up_samples():
+    file = open('samples1.txt')
+    new_file = open("clean_samples.txt", "a+")
+
+    lines = file.readlines()
+
+    for line in lines:
+        cleaned = check_sample(line)
+        if cleaned != 0:
+            new_file.write(cleaned)
+            new_file.write('\n')
+
+
+
+
+def create_bag_of_words_1(text):
+
+    # load words into text file
+    f = open("samples1.txt","a+")
+
+    words = text.split("<|endoftext|>")
+    if '<|endoftext|>' in words:
+        words.remove('<|endoftext|>')
+
+    s = ""
+    text = s.join(words)
+
+
+    remove_words = ['[31m', '[0m']
+
+    words = text.split(remove_words[0])
+    if remove_words[0] in words:
+        words.remove(remove_words[0])
+
+    s = ""
+    text = s.join(words)
+
+    words = text.split(remove_words[1])
+    if remove_words[1] in words:
+        words.remove(remove_words[1])
+
+    s = ""
+    text = s.join(words)
+    lines = text.split('\n')
+
+    f.seek(0)
+    data = f.read(100)
+    if len(data) > 0:
+        f.write('\n')
+
+    f.write(lines[0])
+    f.write('\n')
+
+    f.close()
 
     return
 
